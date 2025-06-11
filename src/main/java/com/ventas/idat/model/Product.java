@@ -9,9 +9,8 @@ import lombok.ToString;
 
 @Entity
 @Data
-@ToString(of = {"id", "name", "description", "price", "stock"})
+@ToString(of = { "id", "name", "description", "price", "stock" })
 public class Product {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
