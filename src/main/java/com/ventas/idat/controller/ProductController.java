@@ -3,10 +3,10 @@ package com.ventas.idat.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.ventas.idat.dto.ProductDTO;
 import com.ventas.idat.model.Product;
@@ -24,30 +24,41 @@ public class ProductController {
     public ProductService productService;
 
     @GetMapping("")
-    public List<Product> listAll() {
-        return productService.listAll();
+    public ResponseEntity<List<Product>> listAll() {
+        return ResponseEntity.ok().body(productService.listAll());
+    }
+
+    @GetMapping("/search-by-name")
+    public ResponseEntity<Page<Product>> getProductsByName(@RequestParam String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<Product> result = productService.findByName(name, pageable);
+
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
-    public Product getById(@PathVariable Long id) {
-        return productService.getById(id);
+    public ResponseEntity<Product> getById(@PathVariable Long id) {
+        return ResponseEntity.ok().body(productService.getById(id));
     }
-    
+
     @PostMapping("")
     public ResponseEntity<Product> create(@Valid @RequestBody ProductDTO productDto) {
-        Product product =  convertToEntity(productDto);
+        Product product = convertToEntity(productDto);
         Product productSaved = productService.save(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(productSaved);
     }
 
     @PutMapping("/{id}")
-    public Product update(@PathVariable Long id, @RequestBody Product product) {        
-        return productService.update(id, product);
+    public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product product) {
+        return ResponseEntity.status(HttpStatus.OK).body(productService.update(id, product));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     private Product convertToEntity(ProductDTO dto) {

@@ -3,8 +3,11 @@ package com.ventas.idat.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.ventas.idat.exception.NotFoundException;
 import com.ventas.idat.model.Product;
 import com.ventas.idat.repository.ProductRepository;
 
@@ -19,7 +22,11 @@ public class ProductService {
     }
 
     public Product getById(Long id) {
-        return repository.findById(id).orElseThrow();
+        return repository.findById(id).orElseThrow(() -> new NotFoundException("Product with ID=" + id + " not exist"));
+    }
+
+    public Page<Product> findByName(String name, PageRequest page) {
+        return repository.findByNameContainingIgnoreCase(name, page);
     }
 
     public Product save(Product product){
@@ -36,6 +43,9 @@ public class ProductService {
     }
 
     public void delete(Long id) {
+        if(!repository.existsById(id)) {
+            throw new NotFoundException("Product not found");
+        }
         repository.deleteById(id);
     }
 
